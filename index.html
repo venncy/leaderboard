@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>funky leaderboard</title>
+    <script type='text/javascript' src='config.js'></script>
+    <script type="text/javascript" src="script.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="leaderboard">
+        <h1>TFT Leaderboard</h1>
+        <button type="button" class="update" onClick="update()">Update</button>
+        <p id="lastUpdated"></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Rank</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+            </tbody>
+        </table>
+    </div>
+    <footer>
+        <p>This leaderboard isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,39 @@
+body {
+    background-color: #e1e5eb;
+    font-family: 'Merriweather', serif;
+}
+
+#leaderboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    color: #364c69;
+}
+
+p {
+    font-size: 12px;
+}
+
+.update {
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    color: #e7e8ec;
+    background-color: #3d4f66;
+    font-family: 'Merriweather', serif;
+}
+
+table {
+    color: #544d7e;
+    border-spacing: 2em 5px;
+}
+
+footer {
+    position: fixed;
+    bottom: 0px;
+    font-size: 6px;
+}
