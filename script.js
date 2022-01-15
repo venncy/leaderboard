@@ -1,6 +1,6 @@
-const key = config.API_KEY; // remember to change daily since i dont have a prod key :(
+const key = ""; // remember to change daily since i dont have a prod key :(
 
-let players = {"venncy": null}; // add other players here to have them show up on the leaderboard
+let players = {}; // add other players here to have them show up on the leaderboard
 
 const ranksEnum = Object.freeze({
     "IRON IV": 0, "IRON III": 1, "IRON II": 2, "IRON I": 3,
@@ -12,18 +12,29 @@ const ranksEnum = Object.freeze({
     "MASTER": 24, "GRANDMASTER": 25, "CHALLENGER": 26
 });
 
+function clickHandler() {
+    changeButtonText();
+    update();
+    changeLastUpdated();
+}
+
 function update() {
+    clearBoard();
+    let users = Object.keys(players);
+    users.forEach(user => getPlayerInfo(user));
+    setTimeout(orderPlayers, 500); // the timeout is so the players object has time to finish updating; there's definitely a more elegant way to do this
+}
+
+function clearBoard() {
+    // removes all current entries and fetches each player's information from the riot api
     let tableBody = document.getElementById("leaderboardBody");
     while (tableBody.childNodes.length != 0) {
         tableBody.removeChild(tableBody.childNodes[0]);
     }
-    let users = Object.keys(players);
-    for (let i = 0; i < users.length; i++) {
-        getPlayerInfo(users[i]);
-    }
 }
 
 function getPlayerInfo(player) {
+    // fetching from riot api with summoner name
     fetch(`https://na1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${player}?api_key=${key}`)
     .then(response => response.json())
     .then(data => {
@@ -34,28 +45,69 @@ function getPlayerInfo(player) {
 }
 
 function rankFromSummonerId(player, id) {
+    // since riot api doesnt have tft rank from summoner name, we have to find it from the id
     fetch(`https://na1.api.riotgames.com/tft/league/v1/entries/by-summoner/${id}?api_key=${key}`)
     .then(response => response.json())
     .then(data => {
-        let info = data[0]; // for some reason the endpoint returns an array of the json?
-        updateRank(player, `${info["tier"]} ${info["rank"]}`);
+        let info = data[0];
+        players[player] = `${info["tier"]} ${info["rank"]}`;
     })
-    .catch(error => alert(error))
+    .catch(error => console.log(error))
 }
 
-function updateRank(player, rank) {
-    players[player] = rank;
-    let newRow = document.createElement("tr");
-    let newEntryPlayer = document.createElement("td");
-    let playerNode = document.createTextNode(player);
-    newEntryPlayer.appendChild(playerNode);
-    let newEntryRank = document.createElement("td");
-    let rankNode = document.createTextNode(rank);
-    newEntryRank.appendChild(rankNode);
+function orderPlayers() {
+    const sortedArray = Object.entries(players).sort(([,a],[,b]) => ranksEnum[b] - ranksEnum[a]);
+    displayUpdatedRankings(sortedArray);
+}
 
-    newRow.appendChild(newEntryPlayer);
-    newRow.appendChild(newEntryRank);
+function displayUpdatedRankings(sorted) {
+    sorted.forEach(entry => {
+        let playerUsername = entry[0];
+        let playerRank = entry[1];
+        let newRow = document.createElement("tr");
+        let newEntryPlayer = document.createElement("td");
+        let playerNode = document.createTextNode(playerUsername);
+        newEntryPlayer.appendChild(playerNode);
+        let newEntryRank = document.createElement("td");
+        let rankNode = document.createTextNode(playerRank);
+        newEntryRank.appendChild(rankNode);
 
-    const leaderboardBody = document.getElementById("leaderboardBody");
-    leaderboardBody.appendChild(newRow);
+        newRow.appendChild(newEntryPlayer);
+        newRow.appendChild(newEntryRank);
+
+        const leaderboardBody = document.getElementById("leaderboardBody");
+        leaderboardBody.appendChild(newRow);
+    });
+}
+
+function changeButtonText() {
+    const btn = document.querySelector(".update");
+    if (btn.innerText === "Load Players") {
+        btn.innerText = "Update";
+    }
+}
+
+function changeLastUpdated() {
+    const lastUpdatedText = document.getElementById("lastUpdated");
+    lastUpdatedText.innerText = `Last updated: ${Date()}`
+}
+
+function newPlayerHandler() {
+    const newPlayer = document.querySelector("#newPlayer").value;
+    if (newPlayer === "") {
+        alert("Enter a summoner name!")
+    } else if (newPlayer in players) {
+        alert("This summoner is already in the leaderboard!");
+    } else if (players.length === 10) {
+        alert("The leaderboard is full!") // make a way to remove players
+    } else {
+        document.querySelector(".update").removeAttribute("hidden");
+        document.querySelector("#table").removeAttribute("hidden");
+        players[newPlayer] = null;
+        // need a way to validate that summoner exists in na/has a tft rank
+        clearBoard();
+        getPlayerInfo(newPlayer);
+        setTimeout(orderPlayers, 500); // the timeout is so the players object has time to finish updating; there's definitely a more elegant way to do this
+        changeLastUpdated();
+    }
 }
